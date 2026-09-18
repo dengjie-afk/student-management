@@ -1,111 +1,56 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,500;0,700;1,600&display=swap');
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+:root { --ink: #142326; --paper: #f4f0e8; --lime: #d7e36e; --coral: #e67a58; --line: #c7c1b4; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: 'DM Mono', monospace; }
+button, input { font: inherit; }
+button { border: 0; cursor: pointer; }
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.shell { max-width: 1160px; margin: auto; padding: 48px 28px; }
+.eyebrow { margin: 0 0 10px; color: #5e6968; font-size: .7rem; letter-spacing: .12em; }
+h1, h2 { font-family: 'Playfair Display', serif; letter-spacing: -.04em; }
+h1 { margin: 0; font-size: clamp(2.5rem, 7vw, 5rem); line-height: .95; }
+h2 { margin: .2rem 0 1rem; font-size: 2rem; }
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
-}
+.login { min-height: 100vh; padding: 12vh max(8vw, 28px); background: radial-gradient(circle at 85% 20%, var(--lime), transparent 27%), var(--paper); }
+.login h1 { max-width: 720px; font-size: clamp(3.6rem, 10vw, 8.5rem); }
+.login i { color: var(--coral); }
+.loginform { display: grid; max-width: 480px; margin-top: 32px; gap: 14px; }
+.loginform label { display: grid; gap: 7px; font-size: .78rem; letter-spacing: .08em; }
+.loginform input { width: 100%; padding: 14px; border: 1px solid var(--ink); background: #fffdf8; color: var(--ink); }
+.login .loginform button { width: max-content; margin: 8px 0 0; padding: 16px 22px; background: var(--ink); color: var(--paper); }
+.demoaccounts { display: grid; max-width: 560px; margin-top: 34px; padding-top: 20px; border-top: 1px solid var(--line); grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.demoaccounts .eyebrow { grid-column: 1 / -1; }
+.login .demoaccounts button { margin: 0; padding: 10px 12px; border: 1px solid var(--ink); background: transparent; color: var(--ink); font-size: .72rem; text-align: left; }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+.text { position: absolute; top: 6px; right: 0; background: none; text-decoration: underline; }
+header { position: relative; padding-bottom: 28px; border-bottom: 2px solid var(--ink); }
+.numbers { display: grid; margin: 28px 0; background: var(--ink); grid-template-columns: repeat(3, 1fr); gap: 1px; }
+.numbers div { padding: 22px; background: var(--paper); }
+.numbers b { display: block; font-family: 'Playfair Display', serif; font-size: 3rem; }
+.numbers span { font-size: .75rem; }
+.risk { display: grid; grid-template-columns: 1.7fr 1fr; gap: 28px; }
+.riskrow, .studentlist button { display: grid; width: 100%; padding: 18px 0; border-bottom: 1px solid var(--line); background: none; text-align: left; grid-template-columns: 1fr 1.4fr auto; gap: 12px; }
+.riskrow em { color: #a8492f; font-style: normal; }
+.studentlist { padding-left: 24px; border-left: 1px solid var(--line); }
+.studentlist button { display: flex; justify-content: space-between; }
+.studentlist small { color: #657; }
+aside { position: fixed; top: 0; right: 0; width: min(460px, 100vw); height: 100vh; padding: 55px 34px; overflow: auto; background: #183336; color: #eef0db; box-shadow: -15px 0 50px #0003; }
+.close { position: absolute; top: 20px; right: 24px; background: none; color: #eef0db; font-size: 2rem; }
+.classpick { display: block; width: 100%; margin: 9px 0; padding: 14px; background: #eef0db; color: var(--ink); text-align: left; }
+.classpick span { display: block; margin-top: 5px; font-size: .75rem; }
+.notice, .error { margin-top: 18px; padding: 12px; background: #ffe3d9; color: #802d19; }
+.lesson { padding: 28px 0; border-bottom: 1px solid var(--line); }
+.lesson article { margin: 12px 0; padding: 14px; background: #e5ddcc; }
+.lesson article p { margin: .4rem 0; }
+.lesson small { color: #526; }
+.lesson details { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 10px; }
+.lesson summary { cursor: pointer; font-weight: 500; }
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+@media (max-width: 700px) {
+  .shell { padding: 30px 18px; }
+  .risk, .numbers { grid-template-columns: 1fr; }
+  .studentlist { padding: 0; border: 0; }
+  .riskrow { grid-template-columns: 1fr; }
+  .demoaccounts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

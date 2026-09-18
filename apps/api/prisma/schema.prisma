@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+}
+
+model User {
+  id             String   @id
+  name           String
+  email          String   @unique
+  password       String
+  role           Role
+  ownedStudents  Student[] @relation("StudentOwner")
+  taughtClasses  Class[]   @relation("ClassTeacher")
+}
+
+model Student {
+  id            String       @id
+  name          String
+  ownerAdminId  String
+  ownerAdmin    User         @relation("StudentOwner", fields: [ownerAdminId], references: [id])
+  learningGoal  String
+  notes         String
+  enrollments   Enrollment[]
+  creditPackages CreditPackage[]
+  creditLedger  CreditLedger[]
+  briefs        TeacherBrief[]
+}
+
+model Class {
+  id          String       @id
+  title       String
+  teacherId   String
+  teacher     User         @relation("ClassTeacher", fields: [teacherId], references: [id])
+  dayOfWeek   Int
+  startMinute Int
+  endMinute   Int
+  capacity    Int
+  enrollments Enrollment[]
+}
+
+model Enrollment {
+  id        String   @id
+  studentId String
+  classId   String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id])
+  class     Class    @relation(fields: [classId], references: [id])
+
+  @@index([studentId, active])
+  @@index([classId, active])
+}
+
+model CreditPackage {
+  id        String   @id
+  studentId String
+  purchased Int
+  student   Student  @relation(fields: [studentId], references: [id])
+}
+
+model CreditLedger {
+  id        String   @id
+  studentId String
+  delta     Int
+  reason    String
+  createdAt DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id])
+}
+
+model TeacherBrief {
+  id                String   @id
+  studentId         String
+  enrollmentId      String   @unique
+  fallback          Boolean
+  summary           String
+  learningGoal      String
+  supportStrategies String
+  firstLessonChecks String
+  createdAt         DateTime @default(now())
+  student           Student  @relation(fields: [studentId], references: [id])
+}
