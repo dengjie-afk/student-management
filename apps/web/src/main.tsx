@@ -38,6 +38,15 @@ const request = async <T,>(path: string, token?: string, options?: RequestInit):
 
 const formatTime = (minute: number) => `${String(Math.floor(minute / 60)).padStart(2, '0')}:${String(minute % 60).padStart(2, '0')}`;
 
+const getClassBlockReason = (student: StudentDetail, room: ClassSummary) => {
+  if (student.creditBalance < 1) return '课时已用完';
+  if (student.enrollments.some((item) => item.id === room.id)) return '已安排到该班';
+  if (student.enrollments.some((item) => item.dayOfWeek === room.dayOfWeek && item.startMinute < room.endMinute && room.startMinute < item.endMinute)) {
+    return '与已安排课程时间冲突';
+  }
+  return null;
+};
+
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [adminData, setAdminData] = useState<AdminDashboard | null>(null);
@@ -151,7 +160,10 @@ export default function App() {
     <header><p className="eyebrow">ADMIN / MY STUDENTS</p><h1>你好，{session.user.name}</h1><p>业务时间：Australia/Melbourne · 仅显示你负责的学生</p><button className="text" onClick={logout}>退出</button></header>
     <section className="numbers"><div><b>{adminData?.risks.length ?? 0}</b><span>需要处理的风险</span></div><div><b>{adminData?.students.length ?? 0}</b><span>我负责的学生</span></div><div><b>严格</b><span>学生数据隔离</span></div></section>
     <section className="risk"><div><p className="eyebrow">PRIORITY QUEUE</p><h2>今天先处理这些</h2>{loading ? <p>正在读取风险...</p> : adminData?.risks.length ? adminData.risks.map((risk) => <button className="riskrow" key={risk.studentId} onClick={() => void inspect(risk.studentId)}><b>{risk.studentName}</b><span>{risk.message}</span><em>查看学生</em></button>) : <p>目前没有余额风险。</p>}</div><div className="studentlist"><p className="eyebrow">MY STUDENTS · {adminData?.students.length ?? 0}</p>{adminData?.students.map((student) => <button key={student.id} onClick={() => void inspect(student.id)}>{student.name}<small>{student.creditBalance} credits</small></button>)}</div></section>
-    {selected && <aside><button className="close" onClick={() => setSelected(null)}>x</button><p className="eyebrow">STUDENT FILE</p><h2>{selected.name}</h2><p>{selected.creditBalance} 节可用课时 · 你负责此学生</p><h3>已安排</h3>{selected.enrollments.length ? selected.enrollments.map((item) => <p key={item.id}>{item.title}</p>) : <p>尚未进入固定班。</p>}<h3>安排固定班</h3>{selected.availableClasses.map((room) => <button className="classpick" onClick={() => void enroll(room.id)} key={room.id}><b>{room.title}</b><span>周{room.dayOfWeek} · {formatTime(room.startMinute)}</span></button>)}{message && <p className="notice">{message}</p>}</aside>}
+    {selected && <aside><button className="close" onClick={() => setSelected(null)}>x</button><p className="eyebrow">STUDENT FILE</p><h2>{selected.name}</h2><p>{selected.creditBalance} 节可用课时 · 你负责此学生</p><h3>已安排</h3>{selected.enrollments.length ? selected.enrollments.map((item) => <p key={item.id}>{item.title}</p>) : <p>尚未进入固定班。</p>}<h3>安排固定班</h3>{selected.availableClasses.map((room) => {
+      const reason = getClassBlockReason(selected, room);
+      return <button className="classpick" disabled={Boolean(reason)} onClick={() => void enroll(room.id)} key={room.id}><b>{room.title}</b><span>周{room.dayOfWeek} · {formatTime(room.startMinute)}</span>{reason && <small>{reason}</small>}</button>;
+    })}{message && <p className="notice">{message}</p>}</aside>}
   </main>;
 }
 

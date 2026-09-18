@@ -39,6 +39,8 @@ aside { position: fixed; top: 0; right: 0; width: min(460px, 100vw); height: 100
 .close { position: absolute; top: 20px; right: 24px; background: none; color: #eef0db; font-size: 2rem; }
 .classpick { display: block; width: 100%; margin: 9px 0; padding: 14px; background: #eef0db; color: var(--ink); text-align: left; }
 .classpick span { display: block; margin-top: 5px; font-size: .75rem; }
+.classpick small { display: block; margin-top: 8px; color: #8a3e2a; }
+.classpick:disabled { cursor: not-allowed; opacity: .48; }
 .notice, .error { margin-top: 18px; padding: 12px; background: #ffe3d9; color: #802d19; }
 .lesson { padding: 28px 0; border-bottom: 1px solid var(--line); }
 .lesson article { margin: 12px 0; padding: 14px; background: #e5ddcc; }

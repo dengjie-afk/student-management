@@ -46,6 +46,14 @@ export class SchoolService {
       if (await tx.enrollment.count({ where: { classId, active: true } }) >= target.capacity) throw new ConflictException({ code: 'CLASS_FULL', message: 'This class has reached capacity.' });
       if (student.enrollments.some((entry) => entry.class.dayOfWeek === target.dayOfWeek && entry.class.startMinute < target.endMinute && target.startMinute < entry.class.endMinute)) throw new ConflictException({ code: 'SCHEDULE_CONFLICT', message: 'This weekly class overlaps an existing enrollment.' });
       const enrollment = await tx.enrollment.create({ data: { id: crypto.randomUUID(), studentId, classId } });
+      await tx.creditLedger.create({
+        data: {
+          id: crypto.randomUUID(),
+          studentId,
+          delta: -1,
+          reason: `Weekly class assignment: ${target.title}`,
+        },
+      });
       return { enrollment, student, target };
     });
 
