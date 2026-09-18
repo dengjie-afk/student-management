@@ -9,10 +9,9 @@ cd E:\dj\student-management
 npm install
 ```
 
-### 2. 配置数据库
 
 
-### 3. 初始化数据库和演示数据
+### 2. 初始化数据库和演示数据
 
 ```powershell
 cd E:\dj\student-management\apps\api
@@ -22,7 +21,7 @@ npm run db:push
 npm run db:seed
 ```
 
-### 4. 启动 API
+### 3. 启动 API
 
 终端一：
 
@@ -33,7 +32,7 @@ npm run dev
 
 API 地址：`http://localhost:3001`
 
-### 5. 启动 Web
+### 4. 启动 Web
 
 终端二：
 
