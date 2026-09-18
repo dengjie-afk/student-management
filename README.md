@@ -1,7 +1,7 @@
 # 学生管理系统
 
 ## 启动项目
-
+- E:\dj\student-management 是我当前项目位置, 自行更改
 ### 1. 安装依赖
 
 ```powershell
