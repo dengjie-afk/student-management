@@ -19,11 +19,12 @@ export type TeacherBriefInput = {
 
 export type GeneratedTeacherBrief = z.infer<typeof teacherBriefSchema> & {
   fallback: boolean;
-  source: 'OPENAI' | 'RULE_TEMPLATE';
+  source: 'AI_COMPATIBLE_API' | 'RULE_TEMPLATE';
 };
 
 type TeacherBriefServiceOptions = {
   apiKey?: string;
+  baseUrl?: string;
   model?: string;
   fetchFn?: typeof fetch;
 };
@@ -53,20 +54,22 @@ const responseSchema = {
 @Injectable()
 export class TeacherBriefService {
   private readonly apiKey?: string;
+  private readonly baseUrl?: string;
   private readonly model: string;
   private readonly fetchFn: typeof fetch;
 
   constructor(options: TeacherBriefServiceOptions = {}) {
-    this.apiKey = options.apiKey ?? process.env.OPENAI_API_KEY;
-    this.model = options.model ?? process.env.OPENAI_MODEL ?? 'gpt-4o-mini';
+    this.apiKey = options.apiKey ?? process.env.AI_API_KEY;
+    this.baseUrl = options.baseUrl ?? process.env.AI_BASE_URL;
+    this.model = options.model ?? process.env.AI_CHAT_MODEL_NAME ?? 'qwen3.8-max';
     this.fetchFn = options.fetchFn ?? fetch;
   }
 
   async generate(input: TeacherBriefInput): Promise<GeneratedTeacherBrief> {
-    if (!this.apiKey) return this.fallback(input);
+    if (!this.apiKey || !this.baseUrl) return this.fallback(input);
 
     try {
-      const response = await this.fetchFn('https://api.openai.com/v1/responses', {
+      const response = await this.fetchFn(`${this.baseUrl.replace(/\/+$/, '')}/chat/completions`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
@@ -74,31 +77,21 @@ export class TeacherBriefService {
         },
         body: JSON.stringify({
           model: this.model,
-          input: [
+          messages: [
             {
               role: 'system',
-              content: [{
-                type: 'input_text',
-                text: 'Create a concise first-lesson handoff card for a teacher. Use only facts in the supplied JSON. Do not invent diagnoses, medical claims, or family details. Return JSON matching the provided schema.',
-              }],
+              content: `Create a concise first-lesson handoff card for a teacher. Use only facts in the supplied JSON. Do not invent diagnoses, medical claims, or family details. Return one JSON object matching this schema exactly: ${JSON.stringify(responseSchema)}`,
             },
-            { role: 'user', content: [{ type: 'input_text', text: JSON.stringify(input) }] },
+            { role: 'user', content: JSON.stringify(input) },
           ],
-          text: {
-            format: {
-              type: 'json_schema',
-              name: 'teacher_brief',
-              strict: true,
-              schema: responseSchema,
-            },
-          },
+          response_format: { type: 'json_object' },
         }),
       });
 
       if (!response.ok) return this.fallback(input);
       const body = await response.json() as unknown;
       const content = teacherBriefSchema.parse(JSON.parse(this.outputText(body)));
-      return { ...content, fallback: false, source: 'OPENAI' };
+      return { ...content, fallback: false, source: 'AI_COMPATIBLE_API' };
     } catch {
       // A handoff card must never block an otherwise valid enrollment.
       return this.fallback(input);
@@ -106,11 +99,10 @@ export class TeacherBriefService {
   }
 
   private outputText(body: unknown): string {
-    if (!body || typeof body !== 'object') throw new Error('OpenAI returned an empty response.');
-    const response = body as { output_text?: unknown; output?: Array<{ content?: Array<{ text?: unknown }> }> };
-    if (typeof response.output_text === 'string') return response.output_text;
-    const text = response.output?.flatMap((item) => item.content ?? []).find((item) => typeof item.text === 'string')?.text;
-    if (typeof text !== 'string') throw new Error('OpenAI response did not contain output text.');
+    if (!body || typeof body !== 'object') throw new Error('AI provider returned an empty response.');
+    const response = body as { choices?: Array<{ message?: { content?: unknown } }> };
+    const text = response.choices?.[0]?.message?.content;
+    if (typeof text !== 'string') throw new Error('AI provider response did not contain message content.');
     return text;
   }
 

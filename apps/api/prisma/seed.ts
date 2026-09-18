@@ -1,5 +1,6 @@
 process.env.DATABASE_URL ??= 'file:./student.db';
 import { PrismaClient, Role } from '@prisma/client';
+import { buildSeedStudents } from '../src/seed-data';
 
 const prisma = new PrismaClient();
 
@@ -8,18 +9,30 @@ async function main() {
   await prisma.user.createMany({ data: [
     { id: 'admin-ava', name: 'Ava Chen', email: 'ava@austin.edu', password: 'demo123', role: Role.ADMIN },
     { id: 'admin-noah', name: 'Noah Li', email: 'noah@austin.edu', password: 'demo123', role: Role.ADMIN },
+    { id: 'admin-priya', name: 'Priya Shah', email: 'priya@austin.edu', password: 'demo123', role: Role.ADMIN },
     { id: 'teacher-luca', name: 'Luca Wong', email: 'luca@austin.edu', password: 'demo123', role: Role.TEACHER },
+    { id: 'teacher-mia', name: 'Mia Carter', email: 'mia@austin.edu', password: 'demo123', role: Role.TEACHER },
+    { id: 'teacher-ben', name: 'Ben Ortiz', email: 'ben@austin.edu', password: 'demo123', role: Role.TEACHER },
   ] });
   await prisma.class.createMany({ data: [
     { id: 'jazz-wed', title: 'Jazz Foundations', teacherId: 'teacher-luca', dayOfWeek: 3, startMinute: 1020, endMinute: 1080, capacity: 8 },
-    { id: 'contemporary-wed', title: 'Contemporary Lab', teacherId: 'teacher-luca', dayOfWeek: 3, startMinute: 1050, endMinute: 1110, capacity: 8 },
-    { id: 'hiphop-fri', title: 'Hip-Hop Foundation', teacherId: 'teacher-luca', dayOfWeek: 5, startMinute: 990, endMinute: 1050, capacity: 4 },
+    { id: 'contemporary-wed', title: 'Contemporary Lab', teacherId: 'teacher-mia', dayOfWeek: 3, startMinute: 1050, endMinute: 1110, capacity: 8 },
+    { id: 'hiphop-fri', title: 'Hip-Hop Foundation', teacherId: 'teacher-ben', dayOfWeek: 5, startMinute: 990, endMinute: 1050, capacity: 4 },
+    { id: 'ballet-mon', title: 'Ballet Foundations', teacherId: 'teacher-mia', dayOfWeek: 1, startMinute: 960, endMinute: 1020, capacity: 10 },
+    { id: 'lyrical-sat', title: 'Lyrical Basics', teacherId: 'teacher-ben', dayOfWeek: 6, startMinute: 900, endMinute: 960, capacity: 10 },
   ] });
-  const names = ['Mia Lin', 'Sienna Park', 'Aria Zhang', 'Ella Tran'];
-  for (let index = 0; index < 36; index += 1) {
-    const id = `student-${index + 1}`; const balance = index === 1 ? 0 : index === 2 ? 1 : 6;
-    await prisma.student.create({ data: { id, name: `${names[index % names.length]}${index > 3 ? ` ${index + 1}` : ''}`, ownerAdminId: index < 24 ? 'admin-ava' : 'admin-noah', learningGoal: 'Build confidence in rhythm and coordinated movement.', notes: index === 0 ? 'Prefers a calm introduction and clear step-by-step cues.' : 'Enjoys collaborative practice.', creditLedger: { create: { id: `credit-${id}`, delta: balance, reason: 'Seeded purchased lesson balance' } } } });
+  for (const student of buildSeedStudents()) {
+    await prisma.student.create({ data: {
+      id: student.id,
+      name: student.name,
+      ownerAdminId: student.ownerAdminId,
+      learningGoal: student.learningGoal,
+      notes: student.notes,
+      creditLedger: { create: { id: `credit-${student.id}`, delta: student.creditDelta, reason: 'Seeded purchased lesson balance' } },
+    } });
   }
-  await prisma.enrollment.create({ data: { id: 'en-1', studentId: 'student-1', classId: 'jazz-wed' } });
+  await prisma.enrollment.create({ data: { id: 'en-1', studentId: 'student-21', classId: 'jazz-wed' } });
+  await prisma.enrollment.create({ data: { id: 'en-2', studentId: 'student-71', classId: 'contemporary-wed' } });
+  await prisma.enrollment.create({ data: { id: 'en-3', studentId: 'student-121', classId: 'hiphop-fri' } });
 }
 main().finally(() => prisma.$disconnect());

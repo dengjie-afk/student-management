@@ -32,7 +32,8 @@ export class SchoolService {
   async student(adminId: string, studentId: string) {
     const student = await this.prisma.student.findUnique({ where: { id: studentId }, include: { creditLedger: true, enrollments: { where: { active: true }, include: { class: true } } } });
     if (!student) throw new NotFoundException('Student not found.');
-    return { ...student, creditBalance: student.creditLedger.reduce((sum, item) => sum + item.delta, 0), isOwner: student.ownerAdminId === adminId, enrollments: student.enrollments.map((entry) => entry.class), availableClasses: await this.prisma.class.findMany() };
+    if (student.ownerAdminId !== adminId) throw new ForbiddenException('You may only view students assigned to you.');
+    return { ...student, creditBalance: student.creditLedger.reduce((sum, item) => sum + item.delta, 0), isOwner: true, enrollments: student.enrollments.map((entry) => entry.class), availableClasses: await this.prisma.class.findMany() };
   }
   async enroll(adminId: string, studentId: string, classId: string) {
     const created = await this.prisma.$transaction(async (tx) => {
